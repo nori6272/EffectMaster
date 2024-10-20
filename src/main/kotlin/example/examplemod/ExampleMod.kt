@@ -87,10 +87,11 @@ object ExampleMod {
 
             if (entity is ServerPlayer) {
                 val effect = event.effectInstance.effect
-                if (entity.persistentData.getBoolean("effect_disabled_${effect.descriptionId}")) {
+                val effectId = BuiltInRegistries.MOB_EFFECT.getKey(effect)?.toString() ?: return
+                if (entity.persistentData.getBoolean("effect_disabled_$effectId")) {
                     event.isCanceled = true
-                    // エフェクトを適用しようとした際のログ
-                    println("Prevented application of disabled effect: ${effect.descriptionId} to player: ${entity.name}")
+                    // ログ出力
+                    println("Prevented application of disabled effect: $effectId to player: ${entity.name}")
                 }
             }
         }
@@ -100,22 +101,10 @@ object ExampleMod {
             val entity = event.entity
             if (entity.level().isClientSide) return
 
-            if (entity is Mob) {
-                // エンティティが持っているエフェクトをチェック
-                entity.activeEffects.forEach { effect ->
-                    val effectId = BuiltInRegistries.MOB_EFFECT.getKey(effect.effect)?.toString() ?: return@forEach
-
-                    // プレイヤーの近くにいる場合のみチェック
-                    val nearbyPlayers = entity.level().getEntitiesOfClass(ServerPlayer::class.java, entity.boundingBox.inflate(16.0))
-
-                    if (nearbyPlayers.any { player ->
-                            player.persistentData.getBoolean("effect_disabled_$effectId")
-                        }) {
-                        // エフェクトが無効化されている場合、エンティティの行動を制限
-                        entity.navigation.stop()
-                        entity.setTarget(null)
-                        // 必要に応じて他の行動制限を追加
-                    }
+            if (entity is ServerPlayer) {
+                entity.activeEffects.removeIf { effect ->
+                    val effectId = BuiltInRegistries.MOB_EFFECT.getKey(effect.effect)?.toString() ?: return@removeIf false
+                    entity.persistentData.getBoolean("effect_disabled_$effectId")
                 }
             }
         }
