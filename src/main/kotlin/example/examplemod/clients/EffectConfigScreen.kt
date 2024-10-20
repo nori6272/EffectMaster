@@ -11,87 +11,55 @@ import example.examplemod.network.NetworkHandler
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.client.gui.screens.Screen
+import net.minecraft.world.effect.MobEffect
+import java.awt.Color
+import me.shedaniel.clothconfig2.api.ConfigCategory
+import me.shedaniel.clothconfig2.api.ConfigEntryBuilder
+import net.minecraft.resources.ResourceLocation
 
 @OnlyIn(Dist.CLIENT)
-class EffectConfigScreen(
-    menu: EffectConfigMenu,
-    playerInventory: Inventory,
-    title: Component
-) : AbstractContainerScreen<EffectConfigMenu>(menu, playerInventory, title) {
+class EffectConfigScreen(parent: Screen?) : Screen(Component.translatable("examplemod.config.title")) {
 
-    private var configScreen: Screen? = null
+    private val configBuilder: ConfigBuilder = ConfigBuilder.create()
+        .setParentScreen(parent)
+        .setTitle(Component.translatable("examplemod.config.title"))
+        .setSavingRunnable(::saveConfig)
 
-    override fun init() {
-        super.init()
-
-        val builder = ConfigBuilder.create()
-            .setParentScreen(this)
-            .setTitle(title)
-
-        val category = builder.getOrCreateCategory(Component.literal("エフェクト"))
+    init {
+        val effectsCategory: ConfigCategory = configBuilder.getOrCreateCategory(Component.translatable("examplemod.config.category.effects"))
+        val entryBuilder: ConfigEntryBuilder = configBuilder.entryBuilder()
 
         BuiltInRegistries.MOB_EFFECT.forEach { effect ->
             val effectId = BuiltInRegistries.MOB_EFFECT.getId(effect)
-            val name = BuiltInRegistries.MOB_EFFECT.getKey(effect)?.toString() ?: "Unknown"
+            val effectName = BuiltInRegistries.MOB_EFFECT.getKey(effect)?.toString() ?: "Unknown"
 
-            category.addEntry(
-                builder.entryBuilder()
-                    .startBooleanToggle(Component.literal(name), false)
+            effectsCategory.addEntry(
+                entryBuilder.startBooleanToggle(Component.literal(effectName), false)
                     .setDefaultValue(false)
+                    .setTooltip(Component.translatable("examplemod.config.effect.tooltip", effectName))
                     .setSaveConsumer { enabled ->
                         NetworkHandler.sendToServer(EffectTogglePacket(effectId, enabled))
                     }
                     .build()
             )
         }
+    }
 
-        // 次のティックでCloth Configの画面を設定
-        minecraft?.tell {
-            configScreen = builder.build()
-            this@EffectConfigScreen.init() // Cloth Configの画面を初期化
+    override fun init() {
+        super.init()
+        // Cloth Configのスクリーンを初期化
+        val clothConfigScreen = configBuilder.build()
+        this.minecraft?.setScreen(clothConfigScreen)
+    }
+
+    private fun saveConfig() {
+        // 設定の保存処理
+        // 必要に応じてForgeの設定システムを使用して設定を保存
+    }
+
+    companion object {
+        fun create(parent: Screen?): Screen {
+            return EffectConfigScreen(parent)
         }
-    }
-
-    override fun render(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
-        renderBackground(guiGraphics)
-        configScreen?.render(guiGraphics, mouseX, mouseY, partialTick) ?: run {
-            // configScreenがnullの場合、ローディングメッセージを表示
-            val loadingText = Component.literal("Loading...")
-            guiGraphics.drawCenteredString(font, loadingText, width / 2, height / 2, 0xFFFFFF)
-        }
-        super.render(guiGraphics, mouseX, mouseY, partialTick)
-    }
-
-    override fun renderBg(guiGraphics: GuiGraphics, partialTick: Float, mouseX: Int, mouseY: Int) {
-        // 背景を描画する必要がある場合はここに実装
-    }
-
-    override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
-        return configScreen?.mouseClicked(mouseX, mouseY, button) ?: super.mouseClicked(mouseX, mouseY, button)
-    }
-
-    override fun mouseDragged(mouseX: Double, mouseY: Double, button: Int, dragX: Double, dragY: Double): Boolean {
-        return configScreen?.mouseDragged(mouseX, mouseY, button, dragX, dragY) ?: super.mouseDragged(mouseX, mouseY, button, dragX, dragY)
-    }
-
-    override fun mouseReleased(mouseX: Double, mouseY: Double, button: Int): Boolean {
-        return configScreen?.mouseReleased(mouseX, mouseY, button) ?: super.mouseReleased(mouseX, mouseY, button)
-    }
-
-    override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
-        return configScreen?.keyPressed(keyCode, scanCode, modifiers) ?: super.keyPressed(keyCode, scanCode, modifiers)
-    }
-
-    override fun keyReleased(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
-        return configScreen?.keyReleased(keyCode, scanCode, modifiers) ?: super.keyReleased(keyCode, scanCode, modifiers)
-    }
-
-    override fun removed() {
-        super.removed()
-        configScreen?.removed()
-    }
-
-    override fun onClose() {
-        minecraft?.setScreen(null)  // メインメニューに戻る
     }
 }

@@ -1,6 +1,6 @@
 package example.examplemod.commands
 
-import example.examplemod.clients.EffectConfigMenu
+import example.examplemod.clients.EffectConfigScreen
 import example.examplemod.utils.EffectUtilities
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.context.CommandContext
@@ -9,27 +9,33 @@ import net.minecraft.commands.Commands
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
-import net.minecraft.world.SimpleMenuProvider
+
+import example.examplemod.network.NetworkHandler
+import example.examplemod.network.OpenConfigScreenPacket
+
+import net.minecraftforge.fml.ModList
+import net.minecraftforge.fml.loading.FMLEnvironment
 
 object ListEffectsCommand {
     fun register(dispatcher: CommandDispatcher<CommandSourceStack>) {
         dispatcher.register(
             Commands.literal("listeffects")
-                .requires { it.hasPermission(0) } // OP権限レベル2以上が必要
+                .requires { it.hasPermission(0) }
                 .executes { context -> execute(context) }
         )
+
         dispatcher.register(
             Commands.literal("effectconfig")
                 .requires { it.hasPermission(0) }
                 .executes { context ->
                     val player = context.source.player
                     if (player is ServerPlayer) {
-                        player.openMenu(SimpleMenuProvider(
-                            { windowId, playerInventory, _ ->
-                                EffectConfigMenu(windowId, playerInventory)
-                            },
-                            Component.literal("エフェクト設定")
-                        ))
+                        if (FMLEnvironment.dist.isClient) {
+                            // クライアント側でのみ設定画面を開く
+                            openConfigScreen(player)
+                        } else {
+                            player.sendSystemMessage(Component.translatable("examplemod.command.effectconfig.server_message"))
+                        }
                     }
                     1
                 }
@@ -38,14 +44,19 @@ object ListEffectsCommand {
 
     private fun execute(context: CommandContext<CommandSourceStack>): Int {
         val source = context.source
-        val effects = EffectUtilities.getAllEffects()
+        val effects = BuiltInRegistries.MOB_EFFECT.asIterable().toList()
 
-        source.sendSuccess({ Component.literal("登録されているエフェクトの一覧:") }, false)
+        source.sendSuccess({ Component.translatable("examplemod.command.listeffects.header") }, false)
         effects.forEachIndexed { index, effect ->
             val name = BuiltInRegistries.MOB_EFFECT.getKey(effect)?.toString() ?: "Unknown"
             source.sendSuccess({ Component.literal("${index + 1}. $name") }, false)
         }
 
         return effects.size
+    }
+
+    private fun openConfigScreen(player: ServerPlayer) {
+        // サーバーからクライアントに設定画面を開くよう指示するパケットを送信
+        NetworkHandler.sendToClient(OpenConfigScreenPacket(), player)
     }
 }

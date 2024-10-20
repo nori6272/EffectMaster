@@ -8,14 +8,14 @@ import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent
 
 
+
 @Mod.EventBusSubscriber(modid = ExampleMod.ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = [Dist.CLIENT])
 object ClientSetup {
     @SubscribeEvent
     fun onClientSetup(event: FMLClientSetupEvent) {
         event.enqueueWork {
-            MenuScreens.register(ExampleMod.EFFECT_CONFIG_MENU.get()) { menu, inventory, title ->
-                EffectConfigScreen(menu, inventory, title)
-            }
+            // EffectConfigScreenの登録は不要になりました
+            // 代わりに、必要に応じてModMenuなどの統合ライブラリに登録します
         }
     }
 }
