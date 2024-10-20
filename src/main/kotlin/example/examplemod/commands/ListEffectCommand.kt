@@ -1,6 +1,5 @@
 package example.examplemod.commands
 
-import example.examplemod.clients.EffectConfigScreen
 import example.examplemod.utils.EffectUtilities
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.context.CommandContext

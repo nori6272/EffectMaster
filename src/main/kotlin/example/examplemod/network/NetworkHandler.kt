@@ -1,5 +1,6 @@
 package example.examplemod.network
 
+import example.examplemod.network.EffectSettingPacket
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.level.ServerPlayer
 import net.minecraftforge.network.NetworkDirection
@@ -17,9 +18,9 @@ object NetworkHandler {
 
     fun init() {
         var id = 0
-        CHANNEL.messageBuilder(EffectTogglePacket::class.java, id++, NetworkDirection.PLAY_TO_SERVER)
-            .encoder(EffectTogglePacket::encode)
-            .decoder { buf -> EffectTogglePacket.decode(buf) }
+        CHANNEL.messageBuilder(EffectSettingPacket::class.java, id++, NetworkDirection.PLAY_TO_SERVER)
+            .encoder(EffectSettingPacket::encode)
+            .decoder { buf -> EffectSettingPacket.decode(buf) }
             .consumerMainThread { msg, ctx -> msg.handle(ctx) }
             .add()
 
@@ -30,7 +31,7 @@ object NetworkHandler {
             .add()
     }
 
-    fun sendToServer(msg: EffectTogglePacket) {
+    fun sendToServer(msg: EffectSettingPacket) {
         CHANNEL.sendToServer(msg)
     }
 
