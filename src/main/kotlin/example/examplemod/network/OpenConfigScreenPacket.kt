@@ -7,7 +7,6 @@ import java.util.function.Supplier
 
 class OpenConfigScreenPacket {
     fun encode(buf: FriendlyByteBuf) {
-        // エンコードする必要のあるデータがない場合は空のままで構いません
     }
 
     companion object {

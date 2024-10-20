@@ -1,6 +1,5 @@
 package example.examplemod.network
 
-import example.examplemod.network.EffectSettingPacket
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.level.ServerPlayer
 import net.minecraftforge.network.NetworkDirection

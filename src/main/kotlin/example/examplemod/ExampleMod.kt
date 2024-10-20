@@ -3,6 +3,7 @@ package example.examplemod
 import example.examplemod.clients.EffectConfigMenu
 import example.examplemod.block.ModBlocks
 import example.examplemod.commands.ListEffectsCommand
+import example.examplemod.utils.EffectToggleState
 import net.minecraft.client.Minecraft
 import net.minecraft.core.registries.Registries
 import net.minecraft.world.flag.FeatureFlags
@@ -49,6 +50,7 @@ object ExampleMod {
 
         // Register the KDeferredRegister to the mod-specific event bus
         ModBlocks.REGISTRY.register(MOD_BUS)
+        EffectToggleState.loadConfig()
 
         val obj = runForDist(
             clientTarget = {
@@ -67,7 +69,6 @@ object ExampleMod {
     fun onServerStarting(event: RegisterCommandsEvent) {
         ListEffectsCommand.register(event.dispatcher)
     }
-
 
     /**
      * This is used for initializing client specific

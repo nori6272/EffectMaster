@@ -1,6 +1,5 @@
 package example.examplemod.commands
 
-import example.examplemod.utils.EffectUtilities
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.context.CommandContext
 import net.minecraft.commands.CommandSourceStack
@@ -8,11 +7,8 @@ import net.minecraft.commands.Commands
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
-
 import example.examplemod.network.NetworkHandler
 import example.examplemod.network.OpenConfigScreenPacket
-
-import net.minecraftforge.fml.ModList
 import net.minecraftforge.fml.loading.FMLEnvironment
 
 object ListEffectsCommand {
