@@ -5,10 +5,18 @@ import example.examplemod.block.ModBlocks
 import example.examplemod.commands.ListEffectsCommand
 import example.examplemod.utils.EffectToggleState
 import net.minecraft.client.Minecraft
+import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.core.registries.Registries
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.server.level.ServerPlayer
+import net.minecraft.world.entity.Mob
 import net.minecraft.world.flag.FeatureFlags
 import net.minecraft.world.inventory.MenuType
 import net.minecraftforge.event.RegisterCommandsEvent
+import net.minecraftforge.event.entity.living.LivingEvent
+import net.minecraftforge.event.entity.living.MobEffectEvent
+import net.minecraftforge.event.entity.player.PlayerEvent
+import net.minecraftforge.eventbus.api.Event
 import net.minecraftforge.eventbus.api.SubscribeEvent
 import thedarkcolour.kotlinforforge.forge.MOD_BUS
 import thedarkcolour.kotlinforforge.forge.runForDist
@@ -69,6 +77,79 @@ object ExampleMod {
     fun onServerStarting(event: RegisterCommandsEvent) {
         ListEffectsCommand.register(event.dispatcher)
     }
+
+    @Mod.EventBusSubscriber(modid = ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+    object EventHandler {
+        @SubscribeEvent
+        fun onEffectApplicable(event: MobEffectEvent.Applicable) {
+            val entity = event.entity
+            if (entity.level().isClientSide) return
+
+            if (entity is ServerPlayer) {
+                val effect = event.effectInstance.effect
+                if (entity.persistentData.getBoolean("effect_disabled_${effect.descriptionId}")) {
+                    event.isCanceled = true
+                    // エフェクトを適用しようとした際のログ
+                    println("Prevented application of disabled effect: ${effect.descriptionId} to player: ${entity.name}")
+                }
+            }
+        }
+
+        @SubscribeEvent
+        fun onLivingUpdate(event: LivingEvent.LivingTickEvent) {
+            val entity = event.entity
+            if (entity.level().isClientSide) return
+
+            if (entity is Mob) {
+                // エンティティが持っているエフェクトをチェック
+                entity.activeEffects.forEach { effect ->
+                    val effectId = BuiltInRegistries.MOB_EFFECT.getKey(effect.effect)?.toString() ?: return@forEach
+
+                    // プレイヤーの近くにいる場合のみチェック
+                    val nearbyPlayers = entity.level().getEntitiesOfClass(ServerPlayer::class.java, entity.boundingBox.inflate(16.0))
+
+                    if (nearbyPlayers.any { player ->
+                            player.persistentData.getBoolean("effect_disabled_$effectId")
+                        }) {
+                        // エフェクトが無効化されている場合、エンティティの行動を制限
+                        entity.navigation.stop()
+                        entity.setTarget(null)
+                        // 必要に応じて他の行動制限を追加
+                    }
+                }
+            }
+        }
+
+        @SubscribeEvent
+        fun onPlayerLoggedIn(event: PlayerEvent.PlayerLoggedInEvent) {
+            val player = event.entity
+            if (player is ServerPlayer) {
+                // 保存された設定を読み込む
+                val compound = player.persistentData.getCompound(ID)
+                compound.allKeys.forEach { key ->
+                    if (key.startsWith("effect_disabled_")) {
+                        val effectId = key.substringAfter("effect_disabled_")
+                        val effect = BuiltInRegistries.MOB_EFFECT.get(ResourceLocation(effectId))
+                        if (effect != null) {
+                            player.removeEffect(effect)
+                        }
+                    }
+                }
+            }
+        }
+
+        @SubscribeEvent
+        fun onPlayerLoggedOut(event: PlayerEvent.PlayerLoggedOutEvent) {
+            val player = event.entity
+            if (player is ServerPlayer) {
+                // 設定を保存
+                val compound = player.persistentData.getCompound(ID)
+                player.persistentData.put(ID, compound)
+            }
+        }
+    }
+
+
 
     /**
      * This is used for initializing client specific
