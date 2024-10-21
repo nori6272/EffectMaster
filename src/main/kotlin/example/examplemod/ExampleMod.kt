@@ -1,7 +1,7 @@
 package example.examplemod
 
-import example.examplemod.clients.EffectConfigMenu
 import example.examplemod.block.ModBlocks
+import example.examplemod.clients.EffectConfigMenu
 import example.examplemod.commands.ListEffectsCommand
 import example.examplemod.utils.EffectToggleState
 import net.minecraft.client.Minecraft
@@ -10,20 +10,15 @@ import net.minecraft.core.registries.Registries
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.effect.MobEffect
-import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.flag.FeatureFlags
 import net.minecraft.world.inventory.MenuType
-import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.event.RegisterCommandsEvent
 import net.minecraftforge.event.TickEvent
-import net.minecraftforge.event.entity.living.LivingEvent
 import net.minecraftforge.event.entity.living.MobEffectEvent
 import net.minecraftforge.event.entity.player.PlayerEvent
 import net.minecraftforge.eventbus.api.Event
 import net.minecraftforge.eventbus.api.EventPriority
 import net.minecraftforge.eventbus.api.SubscribeEvent
-import thedarkcolour.kotlinforforge.forge.MOD_BUS
-import thedarkcolour.kotlinforforge.forge.runForDist
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent
 import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent
@@ -31,6 +26,8 @@ import net.minecraftforge.registries.DeferredRegister
 import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
+import thedarkcolour.kotlinforforge.forge.MOD_BUS
+import thedarkcolour.kotlinforforge.forge.runForDist
 
 
 /**
