@@ -10,8 +10,10 @@ import net.minecraft.core.registries.Registries
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.effect.MobEffect
+import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.flag.FeatureFlags
 import net.minecraft.world.inventory.MenuType
+import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.event.RegisterCommandsEvent
 import net.minecraftforge.event.TickEvent
 import net.minecraftforge.event.entity.living.LivingEvent
@@ -54,7 +56,6 @@ object ExampleMod {
     }
 
     init {
-        LOGGER.log(Level.INFO, "Hello world!")
         val modEventBus = MOD_BUS
         MENU_TYPES.register(modEventBus)
 
@@ -82,7 +83,7 @@ object ExampleMod {
 
     @Mod.EventBusSubscriber(modid = ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
     object EventHandler {
-        @SubscribeEvent(priority = EventPriority.HIGHEST)
+        @SubscribeEvent (priority = EventPriority.HIGH)
         fun onEffectApplicable(event: MobEffectEvent.Applicable) {
             val entity = event.entity
             if (entity.level().isClientSide) return
@@ -91,24 +92,7 @@ object ExampleMod {
                 val effect = event.effectInstance.effect
                 val effectKey = BuiltInRegistries.MOB_EFFECT.getKey(effect)?.toString() ?: ""
                 if (entity.persistentData.getBoolean("effect_disabled_$effectKey")) {
-                    event.result = Event.Result.DENY
-                    entity.removeEffect(effect)
-                    println("Prevented application of disabled effect: $effectKey to player: ${entity.name}")
-                }
-            }
-        }
-
-        @SubscribeEvent(priority = EventPriority.HIGHEST)
-        fun onEffectAdded(event: MobEffectEvent.Added) {
-            val entity = event.entity
-            println("um")
-            if (entity is ServerPlayer) {
-                val effect = event.effectInstance.effect
-                val effectKey = BuiltInRegistries.MOB_EFFECT.getKey(effect)?.toString() ?: ""
-                println("effect_disabled_$effectKey")
-                if (entity.persistentData.getBoolean("effect_disabled_$effectKey")) {
-                    // エフェクトを即座に削除
-                    entity.removeEffect(effect)
+                    event.result = Event.Result.DENY;
                     println("Prevented application of disabled effect: $effectKey to player: ${entity.name}")
                 }
             }
