@@ -9,14 +9,15 @@ import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.core.registries.Registries
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.level.ServerPlayer
-import net.minecraft.world.entity.Mob
 import net.minecraft.world.flag.FeatureFlags
 import net.minecraft.world.inventory.MenuType
 import net.minecraftforge.event.RegisterCommandsEvent
+import net.minecraftforge.event.TickEvent
 import net.minecraftforge.event.entity.living.LivingEvent
 import net.minecraftforge.event.entity.living.MobEffectEvent
 import net.minecraftforge.event.entity.player.PlayerEvent
 import net.minecraftforge.eventbus.api.Event
+import net.minecraftforge.eventbus.api.EventPriority
 import net.minecraftforge.eventbus.api.SubscribeEvent
 import thedarkcolour.kotlinforforge.forge.MOD_BUS
 import thedarkcolour.kotlinforforge.forge.runForDist
@@ -80,7 +81,7 @@ object ExampleMod {
 
     @Mod.EventBusSubscriber(modid = ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
     object EventHandler {
-        @SubscribeEvent
+        @SubscribeEvent(priority = EventPriority.HIGHEST)
         fun onEffectApplicable(event: MobEffectEvent.Applicable) {
             val entity = event.entity
             if (entity.level().isClientSide) return
@@ -89,8 +90,8 @@ object ExampleMod {
                 val effect = event.effectInstance.effect
                 val effectId = BuiltInRegistries.MOB_EFFECT.getKey(effect)?.toString() ?: return
                 if (entity.persistentData.getBoolean("effect_disabled_$effectId")) {
+                    event.result = Event.Result.DENY
                     event.isCanceled = true
-                    // ログ出力
                     println("Prevented application of disabled effect: $effectId to player: ${entity.name}")
                 }
             }
@@ -109,19 +110,51 @@ object ExampleMod {
             }
         }
 
+        @SubscribeEvent(priority = EventPriority.HIGHEST)
+        fun onEffectAdd(event: MobEffectEvent.Added) {
+            val entity = event.entity
+            if (entity.level().isClientSide) return
+
+            if (entity is ServerPlayer) {
+                val effect = event.effectInstance.effect
+                val effectId = BuiltInRegistries.MOB_EFFECT.getKey(effect)?.toString() ?: return
+                if (entity.persistentData.getBoolean("effect_disabled_$effectId")) {
+                    entity.removeEffect(effect)
+                    println("Removed disabled effect: $effectId from player: ${entity.name}")
+                }
+            }
+        }
+
+        @SubscribeEvent
+        fun onPlayerTick(event: TickEvent.PlayerTickEvent) {
+            if (event.phase != TickEvent.Phase.END) return
+            val player = event.player
+            if (player.level().isClientSide) return
+
+            if (player is ServerPlayer) {
+                player.activeEffects.forEach { effect ->
+                    val effectId = BuiltInRegistries.MOB_EFFECT.getKey(effect.effect)?.toString() ?: return@forEach
+                    if (player.persistentData.getBoolean("effect_disabled_$effectId")) {
+                        player.removeEffect(effect.effect)
+                        println("Removed disabled effect: $effectId from player: ${player.name} during tick")
+                    }
+                }
+            }
+        }
+
         @SubscribeEvent
         fun onPlayerLoggedIn(event: PlayerEvent.PlayerLoggedInEvent) {
             val player = event.entity
-            if (player is ServerPlayer) {
-                // 保存された設定を読み込む
-                val compound = player.persistentData.getCompound(ID)
-                compound.allKeys.forEach { key ->
-                    if (key.startsWith("effect_disabled_")) {
-                        val effectId = key.substringAfter("effect_disabled_")
-                        val effect = BuiltInRegistries.MOB_EFFECT.get(ResourceLocation(effectId))
-                        if (effect != null) {
-                            player.removeEffect(effect)
-                        }
+            if (player !is ServerPlayer) return
+
+            val compound = player.persistentData.getCompound(ID)
+            compound.allKeys.forEach { key ->
+                if (key.startsWith("effect_disabled_")) {
+                    val effectId = key.substringAfter("effect_disabled_")
+                    val effect = BuiltInRegistries.MOB_EFFECT.get(ResourceLocation(effectId))
+                    if (effect != null && player.hasEffect(effect)) {
+                        player.removeEffect(effect)
+                        println("Removed disabled effect: $effectId from player: ${player.name} on login")
                     }
                 }
             }
