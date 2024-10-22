@@ -1,15 +1,15 @@
-package example.examplemod.network
+package effect_master.network
 
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.level.ServerPlayer
 import net.minecraftforge.network.NetworkDirection
 import net.minecraftforge.network.NetworkRegistry
 import net.minecraftforge.network.PacketDistributor
-import example.examplemod.ExampleMod
+import effect_master.EffectMaster
 
 object NetworkHandler {
     private val CHANNEL = NetworkRegistry.newSimpleChannel(
-        ResourceLocation(ExampleMod.ID, "main"),
+        ResourceLocation(EffectMaster.ID, "main"),
         { "1.0" },
         { it == "1.0" },
         { it == "1.0" }
@@ -25,7 +25,7 @@ object NetworkHandler {
 
         CHANNEL.messageBuilder(OpenConfigScreenPacket::class.java, id++, NetworkDirection.PLAY_TO_CLIENT)
             .encoder(OpenConfigScreenPacket::encode)
-            .decoder(OpenConfigScreenPacket::decode)
+            .decoder(OpenConfigScreenPacket.Companion::decode)
             .consumerMainThread(OpenConfigScreenPacket::handle)
             .add()
     }

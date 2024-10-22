@@ -1,4 +1,4 @@
-package example.examplemod.commands
+package effect_master.commands
 
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.context.CommandContext
@@ -7,8 +7,8 @@ import net.minecraft.commands.Commands
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
-import example.examplemod.network.NetworkHandler
-import example.examplemod.network.OpenConfigScreenPacket
+import effect_master.network.NetworkHandler
+import effect_master.network.OpenConfigScreenPacket
 import net.minecraftforge.fml.loading.FMLEnvironment
 
 object ListEffectsCommand {
@@ -29,7 +29,7 @@ object ListEffectsCommand {
                             // クライアント側でのみ設定画面を開く
                             openConfigScreen(player)
                         } else {
-                            player.sendSystemMessage(Component.translatable("examplemod.command.effectconfig.server_message"))
+                            player.sendSystemMessage(Component.translatable("effect_master.command.effectconfig.server_message"))
                         }
                     }
                     1
@@ -41,7 +41,7 @@ object ListEffectsCommand {
         val source = context.source
         val effects = BuiltInRegistries.MOB_EFFECT.asIterable().toList()
 
-        source.sendSuccess({ Component.translatable("examplemod.command.listeffects.header") }, false)
+        source.sendSuccess({ Component.translatable("effect_master.command.listeffects.header") }, false)
         effects.forEachIndexed { index, effect ->
             val name = BuiltInRegistries.MOB_EFFECT.getKey(effect)?.toString() ?: "Unknown"
             source.sendSuccess({ Component.literal("${index + 1}. $name") }, false)

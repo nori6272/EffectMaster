@@ -1,4 +1,4 @@
-package example.examplemod.utils
+package effect_master.utils
 
 enum class EffectOptions {
     DISABLED,    // 無効

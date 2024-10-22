@@ -1,4 +1,4 @@
-package example.examplemod.network
+package effect_master.network
 
 import net.minecraftforge.eventbus.api.SubscribeEvent
 import net.minecraftforge.fml.common.Mod

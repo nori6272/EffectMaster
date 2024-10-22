@@ -1,6 +1,6 @@
-package example.examplemod.network
+package effect_master.network
 
-import example.examplemod.clients.EffectConfigScreen
+import effect_master.clients.EffectConfigScreen
 import net.minecraft.network.FriendlyByteBuf
 import net.minecraftforge.network.NetworkEvent
 import java.util.function.Supplier

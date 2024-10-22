@@ -1,12 +1,12 @@
-package example.examplemod.network
+package effect_master.network
 
-import example.examplemod.utils.EffectOptions
+import effect_master.utils.EffectOptions
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.network.FriendlyByteBuf
 import net.minecraft.world.effect.MobEffectInstance
 import net.minecraftforge.network.NetworkEvent
 import java.util.function.Supplier
-import example.examplemod.utils.EffectToggleState
+import effect_master.utils.EffectToggleState
 
 class EffectSettingPacket(val effectId: Int, val setting: EffectOptions) {
     fun encode(buf: FriendlyByteBuf) {
@@ -34,14 +34,14 @@ class EffectSettingPacket(val effectId: Int, val setting: EffectOptions) {
                             player.removeEffect(effect)
 
                             // プレイヤーにこのエフェクトが付与されないようにするフラグを設定
-                            EffectToggleState.setEffectSetting(effect,EffectOptions.DISABLED)
+                            EffectToggleState.setEffectSetting(effect, EffectOptions.DISABLED)
                             println("Set effect $effectKey disabled for player ${player.name}")
                         }
                         EffectOptions.DEFAULT -> {
-                            EffectToggleState.setEffectSetting(effect,EffectOptions.DEFAULT)
+                            EffectToggleState.setEffectSetting(effect, EffectOptions.DEFAULT)
                         }
                         EffectOptions.PERSISTENT -> {
-                            EffectToggleState.setEffectSetting(effect,EffectOptions.PERSISTENT)
+                            EffectToggleState.setEffectSetting(effect, EffectOptions.PERSISTENT)
                             player.addEffect(MobEffectInstance(effect, Int.MAX_VALUE, 0, false, false))
                             println("Set effect $effectKey persistent for player ${player.name}")
                         }

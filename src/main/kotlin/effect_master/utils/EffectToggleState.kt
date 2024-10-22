@@ -1,4 +1,4 @@
-package example.examplemod.utils
+package effect_master.utils
 
 import com.google.gson.*
 import com.google.gson.reflect.TypeToken
@@ -13,7 +13,7 @@ import java.lang.reflect.Type
 
 object EffectToggleState {
     private val effectSettings = mutableMapOf<ResourceLocation, EffectOptions>()
-    private val configFile = File(FMLPaths.CONFIGDIR.get().toFile(), "examplemod_effects.json")
+    private val configFile = File(FMLPaths.CONFIGDIR.get().toFile(), "effect_master_effects.json")
     private val gson = GsonBuilder()
         .registerTypeAdapter(ResourceLocation::class.java, ResourceLocationAdapter())
         .registerTypeAdapter(EffectOptions::class.java, EffectOptionsAdapter())

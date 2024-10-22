@@ -1,13 +1,11 @@
-package example.examplemod
+package effect_master
 
-import example.examplemod.block.ModBlocks
-import example.examplemod.clients.EffectConfigMenu
-import example.examplemod.commands.ListEffectsCommand
-import example.examplemod.utils.EffectToggleState
+import effect_master.clients.EffectConfigMenu
+import effect_master.commands.ListEffectsCommand
+import effect_master.utils.EffectToggleState
 import net.minecraft.client.Minecraft
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.core.registries.Registries
-import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.effect.MobEffect
 import net.minecraft.world.flag.FeatureFlags
@@ -15,7 +13,6 @@ import net.minecraft.world.inventory.MenuType
 import net.minecraftforge.event.RegisterCommandsEvent
 import net.minecraftforge.event.TickEvent
 import net.minecraftforge.event.entity.living.MobEffectEvent
-import net.minecraftforge.event.entity.player.PlayerEvent
 import net.minecraftforge.eventbus.api.Event
 import net.minecraftforge.eventbus.api.EventPriority
 import net.minecraftforge.eventbus.api.SubscribeEvent
@@ -37,16 +34,16 @@ import thedarkcolour.kotlinforforge.forge.runForDist
  *
  * An example for blocks is in the `blocks` package of this mod.
  */
-@Mod(ExampleMod.ID)
+@Mod(EffectMaster.ID)
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.FORGE)
-object ExampleMod {
-    const val ID = "examplemod"
+object EffectMaster {
+    const val ID = "effect_master"
 
     // the logger for our mod
     val LOGGER: Logger = LogManager.getLogger(ID)
 
 
-    private val MENU_TYPES = DeferredRegister.create(Registries.MENU, "examplemod")
+    private val MENU_TYPES = DeferredRegister.create(Registries.MENU, ID)
 
     val EFFECT_CONFIG_MENU = MENU_TYPES.register("effect_config") {
         MenuType(::EffectConfigMenu, FeatureFlags.VANILLA_SET)
@@ -55,18 +52,15 @@ object ExampleMod {
     init {
         val modEventBus = MOD_BUS
         MENU_TYPES.register(modEventBus)
-
-        // Register the KDeferredRegister to the mod-specific event bus
-        ModBlocks.REGISTRY.register(MOD_BUS)
         EffectToggleState.loadConfig()
 
         val obj = runForDist(
             clientTarget = {
-                MOD_BUS.addListener(::onClientSetup)
+                MOD_BUS.addListener(this::onClientSetup)
                 Minecraft.getInstance()
             },
             serverTarget = {
-                MOD_BUS.addListener(::onServerSetup)
+                MOD_BUS.addListener(this::onServerSetup)
                 "test"
             })
 
@@ -89,7 +83,7 @@ object ExampleMod {
             if (entity is ServerPlayer) {
                 val effect = event.effectInstance.effect
                 if (EffectToggleState.isEffectDisabled(effect)) {
-                    event.result = Event.Result.DENY;
+                    event.result = Event.Result.DENY
                     println("Prevented application of disabled effect: ${effect.displayName} to player: ${entity.name}")
                 }
             }

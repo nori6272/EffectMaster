@@ -1,9 +1,9 @@
-package example.examplemod.clients
+package effect_master.clients
 
-import example.examplemod.network.NetworkHandler
-import example.examplemod.network.EffectSettingPacket
-import example.examplemod.utils.EffectOptions
-import example.examplemod.utils.EffectToggleState
+import effect_master.network.NetworkHandler
+import effect_master.network.EffectSettingPacket
+import effect_master.utils.EffectOptions
+import effect_master.utils.EffectToggleState
 import me.shedaniel.clothconfig2.api.ConfigBuilder
 import me.shedaniel.clothconfig2.api.ConfigCategory
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder
@@ -14,11 +14,11 @@ import net.minecraftforge.api.distmarker.Dist
 import net.minecraftforge.api.distmarker.OnlyIn
 
 @OnlyIn(Dist.CLIENT)
-class EffectConfigScreen(parent: Screen?) : Screen(Component.translatable("examplemod.config.title")) {
+class EffectConfigScreen(parent: Screen?) : Screen(Component.translatable("effect_master.config.title")) {
 
     private val configBuilder: ConfigBuilder = ConfigBuilder.create()
         .setParentScreen(parent)
-        .setTitle(Component.translatable("examplemod.config.title"))
+        .setTitle(Component.translatable("effect_master.config.title"))
         .setSavingRunnable(::saveConfig)
 
     init {
@@ -26,7 +26,7 @@ class EffectConfigScreen(parent: Screen?) : Screen(Component.translatable("examp
     }
 
     private fun rebuildConfig() {
-        val effectsCategory: ConfigCategory = configBuilder.getOrCreateCategory(Component.translatable("examplemod.config.category.effects"))
+        val effectsCategory: ConfigCategory = configBuilder.getOrCreateCategory(Component.translatable("effect_master.config.category.effects"))
         val entryBuilder: ConfigEntryBuilder = configBuilder.entryBuilder()
         val currentSettings = EffectToggleState.getAllEffectSettings()
         BuiltInRegistries.MOB_EFFECT.forEach { effect ->
@@ -40,7 +40,7 @@ class EffectConfigScreen(parent: Screen?) : Screen(Component.translatable("examp
                     EffectOptions::class.java,
                     currentSetting
                 )
-                    .setTooltip(Component.translatable("examplemod.config.effect.tooltip", effect.displayName))
+                    .setTooltip(Component.translatable("effect_master.config.effect.tooltip", effect.displayName))
                     .setSaveConsumer { newValue ->
                         EffectToggleState.setEffectSetting(effect, newValue)
                         NetworkHandler.sendToServer(EffectSettingPacket(effectId, newValue))
