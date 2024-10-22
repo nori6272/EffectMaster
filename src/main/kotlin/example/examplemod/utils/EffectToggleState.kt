@@ -1,6 +1,6 @@
 package example.examplemod.utils
 
-import com.google.gson.Gson
+import com.google.gson.*
 import com.google.gson.reflect.TypeToken
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.resources.ResourceLocation
@@ -9,11 +9,20 @@ import net.minecraftforge.fml.loading.FMLPaths
 import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
+import java.lang.reflect.Type
 
 object EffectToggleState {
     private val effectSettings = mutableMapOf<ResourceLocation, EffectOptions>()
     private val configFile = File(FMLPaths.CONFIGDIR.get().toFile(), "examplemod_effects.json")
-    private val gson = Gson()
+    private val gson = GsonBuilder()
+        .registerTypeAdapter(ResourceLocation::class.java, ResourceLocationAdapter())
+        .registerTypeAdapter(EffectOptions::class.java, EffectOptionsAdapter())
+        .create()
+
+    fun getAllEffectSettings(): Map<ResourceLocation, EffectOptions> {
+        loadConfig()
+        return effectSettings.toMap()  // 変更不可能なコピーを返す
+    }
 
     fun getEffectSetting(effect: MobEffect): EffectOptions {
         val key = BuiltInRegistries.MOB_EFFECT.getKey(effect)
@@ -33,7 +42,6 @@ object EffectToggleState {
                 gson.toJson(effectSettings, writer)
             }
         } catch (e: Exception) {
-            // エラーログを出力
             println("Failed to save config: ${e.message}")
         }
     }
@@ -48,9 +56,36 @@ object EffectToggleState {
                     effectSettings.putAll(loadedSettings)
                 }
             } catch (e: Exception) {
-                // エラーログを出力
                 println("Failed to load config: ${e.message}")
+                e.printStackTrace()
             }
+        } else {
+            println("Config file does not exist")
+        }
+    }
+}
+
+class ResourceLocationAdapter : JsonSerializer<ResourceLocation>, JsonDeserializer<ResourceLocation> {
+    override fun serialize(src: ResourceLocation, typeOfSrc: Type, context: JsonSerializationContext): JsonElement {
+        return JsonPrimitive(src.toString())
+    }
+
+    override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): ResourceLocation {
+        val parts = json.asString.split(":")
+        return ResourceLocation(parts[0], parts[1])
+    }
+}
+
+class EffectOptionsAdapter : JsonSerializer<EffectOptions>, JsonDeserializer<EffectOptions> {
+    override fun serialize(src: EffectOptions, typeOfSrc: Type, context: JsonSerializationContext): JsonElement {
+        return JsonPrimitive(src.name)
+    }
+
+    override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): EffectOptions {
+        return try {
+            EffectOptions.valueOf(json.asString)
+        } catch (e: IllegalArgumentException) {
+            EffectOptions.DEFAULT
         }
     }
 }

@@ -9,7 +9,6 @@ object NetworkSetup {
     @SubscribeEvent
     fun onCommonSetup(event: FMLCommonSetupEvent) {
         event.enqueueWork {
-            // ここでネットワークチャンネルを登録
             NetworkHandler.init()
         }
     }

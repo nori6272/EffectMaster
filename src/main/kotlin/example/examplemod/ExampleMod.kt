@@ -82,6 +82,7 @@ object ExampleMod {
     object EventHandler {
         @SubscribeEvent (priority = EventPriority.HIGH)
         fun onEffectApplicable(event: MobEffectEvent.Applicable) {
+            println("start onEffectApplicable")
             val entity = event.entity
             if (entity.level().isClientSide) return
 
@@ -117,35 +118,34 @@ object ExampleMod {
             }
         }
 
-        @SubscribeEvent
-        fun onPlayerLoggedIn(event: PlayerEvent.PlayerLoggedInEvent) {
-            val player = event.entity
-            if (player !is ServerPlayer) return
-
-            val compound = player.persistentData.getCompound(ID)
-            println("Loaded effect settings for player: ${player.name}")
-            compound.allKeys.forEach { key ->
-                if (key.startsWith("effect_disabled_")) {
-                    val effectId = key.substringAfter("effect_disabled_")
-                    val effect = BuiltInRegistries.MOB_EFFECT.get(ResourceLocation(effectId))
-                    if (effect != null && player.hasEffect(effect)) {
-                        player.removeEffect(effect)
-                        println("Removed disabled effect: $effectId from player: ${player.name} on login")
-                    }
-                }
-            }
-        }
-
-        @SubscribeEvent
-        fun onPlayerLoggedOut(event: PlayerEvent.PlayerLoggedOutEvent) {
-            val player = event.entity
-            if (player is ServerPlayer) {
-                // 設定を保存
-                val compound = player.persistentData.getCompound(ID)
-                player.persistentData.put(ID, compound)
-                println("Saved effect settings for player: ${player.name}")
-            }
-        }
+//        @SubscribeEvent
+//        fun onPlayerLoggedIn(event: PlayerEvent.PlayerLoggedInEvent) {
+//            val player = event.entity
+//            if (player !is ServerPlayer) return
+//
+//            val compound = player.persistentData.getCompound(ID)
+//            println("Loaded effect settings for player: ${player.name}")
+//            compound.allKeys.forEach { key ->
+//                if (key.startsWith("effect_disabled_")) {
+//                    val effectId = key.substringAfter("effect_disabled_")
+//                    val effect = BuiltInRegistries.MOB_EFFECT.get(ResourceLocation(effectId))
+//                    if (effect != null && player.hasEffect(effect)) {
+//                        player.removeEffect(effect)
+//                        println("Removed disabled effect: $effectId from player: ${player.name} on login")
+//                    }
+//                }
+//            }
+//        }
+//
+//        @SubscribeEvent
+//        fun onPlayerLoggedOut(event: PlayerEvent.PlayerLoggedOutEvent) {
+//            val player = event.entity
+//            if (player is ServerPlayer) {
+//                // 設定を保存
+//                val compound = player.persistentData.getCompound(ID)
+//                player.persistentData.put(ID, compound)
+//            }
+//        }
     }
 
 

@@ -38,7 +38,7 @@ class EffectSettingPacket(val effectId: Int, val setting: EffectOptions) {
                         EffectOptions.DEFAULT -> {
                             // デフォルトの場合は、無効化フラグを削除
                             player.persistentData.remove("effect_disabled_$effectKey")
-                            println("Removed disabled flag for effect $effectKey for player ${player.name}")
+                            println("Set Default flag for effect $effectKey for player ${player.name}")
                         }
                         EffectOptions.PERSISTENT -> {
                             player.persistentData.remove("effect_disabled_$effectKey")
