@@ -88,10 +88,9 @@ object ExampleMod {
 
             if (entity is ServerPlayer) {
                 val effect = event.effectInstance.effect
-                val effectKey = BuiltInRegistries.MOB_EFFECT.getKey(effect)?.toString() ?: ""
-                if (entity.persistentData.getBoolean("effect_disabled_$effectKey")) {
+                if (EffectToggleState.isEffectDisabled(effect)) {
                     event.result = Event.Result.DENY;
-                    println("Prevented application of disabled effect: $effectKey to player: ${entity.name}")
+                    println("Prevented application of disabled effect: ${effect.displayName} to player: ${entity.name}")
                 }
             }
         }
@@ -105,10 +104,9 @@ object ExampleMod {
             if (player is ServerPlayer) {
                 val effectsToRemove = mutableListOf<MobEffect>()
                 player.activeEffects.forEach { effect ->
-                    val effectKey = BuiltInRegistries.MOB_EFFECT.getKey(effect.effect)?.toString() ?: return@forEach
-                    if (player.persistentData.getBoolean("effect_disabled_$effectKey")) {
+                    if (EffectToggleState.isEffectDisabled(effect.effect)) {
                         effectsToRemove.add(effect.effect)
-                        println("Removed disabled effect: $effectKey from player: ${player.name}")
+                        println("Removed disabled effect: ${effect.effect.displayName} from player: ${player.name}")
                     }
                 }
                 effectsToRemove.forEach { effect: MobEffect ->
@@ -117,35 +115,6 @@ object ExampleMod {
                 }
             }
         }
-
-//        @SubscribeEvent
-//        fun onPlayerLoggedIn(event: PlayerEvent.PlayerLoggedInEvent) {
-//            val player = event.entity
-//            if (player !is ServerPlayer) return
-//
-//            val compound = player.persistentData.getCompound(ID)
-//            println("Loaded effect settings for player: ${player.name}")
-//            compound.allKeys.forEach { key ->
-//                if (key.startsWith("effect_disabled_")) {
-//                    val effectId = key.substringAfter("effect_disabled_")
-//                    val effect = BuiltInRegistries.MOB_EFFECT.get(ResourceLocation(effectId))
-//                    if (effect != null && player.hasEffect(effect)) {
-//                        player.removeEffect(effect)
-//                        println("Removed disabled effect: $effectId from player: ${player.name} on login")
-//                    }
-//                }
-//            }
-//        }
-//
-//        @SubscribeEvent
-//        fun onPlayerLoggedOut(event: PlayerEvent.PlayerLoggedOutEvent) {
-//            val player = event.entity
-//            if (player is ServerPlayer) {
-//                // 設定を保存
-//                val compound = player.persistentData.getCompound(ID)
-//                player.persistentData.put(ID, compound)
-//            }
-//        }
     }
 
 

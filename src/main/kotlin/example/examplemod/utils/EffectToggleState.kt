@@ -24,16 +24,16 @@ object EffectToggleState {
         return effectSettings.toMap()  // 変更不可能なコピーを返す
     }
 
-    fun getEffectSetting(effect: MobEffect): EffectOptions {
-        val key = BuiltInRegistries.MOB_EFFECT.getKey(effect)
-        return effectSettings.getOrDefault(key, EffectOptions.DEFAULT)
-    }
-
     fun setEffectSetting(effect: MobEffect, setting: EffectOptions) {
         val key = BuiltInRegistries.MOB_EFFECT.getKey(effect)
         if (key != null) {
             effectSettings[key] = setting
         }
+    }
+
+    fun isEffectDisabled(effect: MobEffect): Boolean {
+        val key = BuiltInRegistries.MOB_EFFECT.getKey(effect)
+        return effectSettings[key] === EffectOptions.DISABLED
     }
 
     fun saveConfig() {

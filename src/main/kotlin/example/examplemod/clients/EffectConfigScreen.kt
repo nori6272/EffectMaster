@@ -28,22 +28,19 @@ class EffectConfigScreen(parent: Screen?) : Screen(Component.translatable("examp
     private fun rebuildConfig() {
         val effectsCategory: ConfigCategory = configBuilder.getOrCreateCategory(Component.translatable("examplemod.config.category.effects"))
         val entryBuilder: ConfigEntryBuilder = configBuilder.entryBuilder()
-
         val currentSettings = EffectToggleState.getAllEffectSettings()
-
         BuiltInRegistries.MOB_EFFECT.forEach { effect ->
             val effectId = BuiltInRegistries.MOB_EFFECT.getId(effect)
             val effectKey = BuiltInRegistries.MOB_EFFECT.getKey(effect)
-            val effectName = BuiltInRegistries.MOB_EFFECT.getKey(effect)?.toString() ?: "Unknown"
-            val currentSetting = currentSettings[effectKey] ?: EffectOptions.DEFAULT
 
+            val currentSetting = currentSettings[effectKey] ?: EffectOptions.DEFAULT
             effectsCategory.addEntry(
                 entryBuilder.startEnumSelector(
-                    Component.literal(effectName),
+                    effect.displayName,
                     EffectOptions::class.java,
                     currentSetting
                 )
-                    .setTooltip(Component.translatable("examplemod.config.effect.tooltip", effectName))
+                    .setTooltip(Component.translatable("examplemod.config.effect.tooltip", effect.displayName))
                     .setSaveConsumer { newValue ->
                         EffectToggleState.setEffectSetting(effect, newValue)
                         NetworkHandler.sendToServer(EffectSettingPacket(effectId, newValue))
@@ -55,7 +52,6 @@ class EffectConfigScreen(parent: Screen?) : Screen(Component.translatable("examp
 
     override fun init() {
         super.init()
-        rebuildConfig()
         val clothConfigScreen = configBuilder.build()
         this.minecraft?.setScreen(clothConfigScreen)
     }
