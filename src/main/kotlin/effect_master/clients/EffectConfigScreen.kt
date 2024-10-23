@@ -14,11 +14,11 @@ import net.minecraftforge.api.distmarker.Dist
 import net.minecraftforge.api.distmarker.OnlyIn
 
 @OnlyIn(Dist.CLIENT)
-class EffectConfigScreen(parent: Screen?) : Screen(Component.translatable("effect_master.config.title")) {
+class EffectConfigScreen(parent: Screen?) : Screen(Component.literal("Effect Master")) {
 
     private val configBuilder: ConfigBuilder = ConfigBuilder.create()
         .setParentScreen(parent)
-        .setTitle(Component.translatable("effect_master.config.title"))
+        .setTitle(Component.literal("Effect Master"))
         .setSavingRunnable(::saveConfig)
 
     init {
@@ -40,7 +40,7 @@ class EffectConfigScreen(parent: Screen?) : Screen(Component.translatable("effec
                     EffectOptions::class.java,
                     currentSetting
                 )
-                    .setTooltip(Component.translatable("effect_master.config.effect.tooltip", effect.displayName))
+                    .setTooltip(Component.literal(effectKey.toString()))
                     .setSaveConsumer { newValue ->
                         EffectToggleState.setEffectSetting(effect, newValue)
                         NetworkHandler.sendToServer(EffectSettingPacket(effectId, newValue))

@@ -2,17 +2,20 @@ package effect_master
 
 import effect_master.clients.EffectConfigMenu
 import effect_master.commands.ListEffectsCommand
+import effect_master.utils.EffectOptions
 import effect_master.utils.EffectToggleState
 import net.minecraft.client.Minecraft
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.core.registries.Registries
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.effect.MobEffect
+import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.flag.FeatureFlags
 import net.minecraft.world.inventory.MenuType
 import net.minecraftforge.event.RegisterCommandsEvent
 import net.minecraftforge.event.TickEvent
 import net.minecraftforge.event.entity.living.MobEffectEvent
+import net.minecraftforge.event.entity.player.PlayerEvent
 import net.minecraftforge.eventbus.api.Event
 import net.minecraftforge.eventbus.api.EventPriority
 import net.minecraftforge.eventbus.api.SubscribeEvent
@@ -54,17 +57,16 @@ object EffectMaster {
         MENU_TYPES.register(modEventBus)
         EffectToggleState.loadConfig()
 
-        val obj = runForDist(
-            clientTarget = {
-                MOD_BUS.addListener(this::onClientSetup)
-                Minecraft.getInstance()
-            },
-            serverTarget = {
-                MOD_BUS.addListener(this::onServerSetup)
-                "test"
-            })
-
-        println(obj)
+//        val obj = runForDist(
+//            clientTarget = {
+//                MOD_BUS.addListener(this::onClientSetup)
+//                Minecraft.getInstance()
+//            },
+//            serverTarget = {
+//                MOD_BUS.addListener(this::onServerSetup)
+//            })
+//
+//        println(obj)
     }
 
     @SubscribeEvent
@@ -109,23 +111,21 @@ object EffectMaster {
                 }
             }
         }
-    }
 
-
-
-    /**
-     * This is used for initializing client specific
-     * things such as renderers and keymaps
-     * Fired on the mod specific event bus.
-     */
-    private fun onClientSetup(event: FMLClientSetupEvent) {
-        LOGGER.log(Level.INFO, "Initializing client...")
-    }
-
-    /**
-     * Fired on the global Forge bus.
-     */
-    private fun onServerSetup(event: FMLDedicatedServerSetupEvent) {
-        LOGGER.log(Level.INFO, "Server starting...")
+        @SubscribeEvent
+        fun onPlayerLoggedIn(event: PlayerEvent.PlayerLoggedInEvent){
+            val player = event.entity
+            if (player is ServerPlayer) {
+                val effectsSettings = EffectToggleState.getAllEffectSettings()
+                effectsSettings.forEach { effectSetting ->
+                    if (effectSetting.value === EffectOptions.PERSISTENT){
+                        val effect = BuiltInRegistries.MOB_EFFECT.get(effectSetting.key)
+                        if(effect != null){
+                            player.addEffect(MobEffectInstance(effect, Int.MAX_VALUE, 0, false, false))
+                        }
+                    }
+                }
+            }
+        }
     }
 }
